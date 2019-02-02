@@ -1,0 +1,8 @@
+解压目标：XXX.tar.gz
+执行命令：tar -zxvf XXX.tar.gz
+{
+	x ：从tar包中把文件提取出来
+	z ：表示tar包是被gzip压缩过的，所以解压时需要用gunzip解压
+	v ：显示详细信息
+	f XXX.tar.gz ：指定被处理的文件是 XXX.tar.gz
+}

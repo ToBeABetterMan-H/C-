@@ -1,0 +1,2 @@
+1.进入安装时的目录（./configure的目录）
+2.make uninstall
