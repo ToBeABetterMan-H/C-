@@ -1,0 +1,16 @@
+https://www.cnblogs.com/renyuan/p/6216354.html
+
+1.其实for_each就是一个模板函数，将for循环语句封装起来，前面两个参数都是迭代器，第三个参数是使用一个函数指针(或仿函数)，其功能是对每一个迭代器所指向的值调用仿函数。
+
+class ClassName
+{
+	void functionName()
+	{
+	}
+};
+
+std::vector<ClassName*> vec;
+
+std::for_each(vec.begin(),					
+			vec.end(),
+			std::mem_fun(&ClassName::functionName));

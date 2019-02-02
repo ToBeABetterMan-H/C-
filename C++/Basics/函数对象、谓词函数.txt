@@ -1,0 +1,151 @@
+https://www.cnblogs.com/renyuan/p/6216200.html
+
+从概念上讲，函数对象用作函数的对象；但是从实现上来说，函数对象是实现了 operate()的类的对象。
+
+虽然函数和函数指针也可以归为函数对象，但实现了operate()的类的对象才能保存状态，才能用于STL。
+
+1.定义
+{
+	一元函数：接受一个参数的函数，如f(x)。
+	一元谓词函数：如果一元函数返回一个BOOL类型的值，则该函数称为谓词。			
+	二元函数：接受2个参数的函数，如f(x,y)。
+	二元谓词函数：如果二元函数返回一个BOOL值，则该函数称为二元谓词。
+	
+	之所以给返回布尔类型的函数对象专门命名，是因为谓词是用来为算法判断服务的。
+} 
+
+2.一元函数例子
+/*************************************************/
+/* Name: unary_function.cpp
+ * Author: 王小晖
+ * Date: 20180821
+ * Descriptions: 一元函数、函数对象、for_each()学习；unary 一元
+ * */
+ 
+ #include <algorithm>
+ #include <iostream>
+ #include <vector>
+ #include <list>
+ 
+ using namespace std;
+ 
+ /* class that behaves as a unary function */
+ template <typename elementType>
+ class DisplayElement
+ {
+public:
+	void operator()(const elementType& element)const
+	{
+		cout << element << ' ';
+	}
+	static void myPrint(const elementType& element)
+	{
+		cout << element << ' ';
+	}
+	void myPrint2(const elementType& element)
+	{
+		cout << element << ' ';
+	}
+ };
+ 
+ int main()
+ {
+	 vector<int> vecIntegers;
+	 for(int nCount = 0;nCount < 10; nCount++)
+	 {
+		 vecIntegers.push_back(nCount);
+	 }
+	 
+	 list<char> listChars;
+	 for(char nChar = 'a';nChar < 'k';nChar++)
+	 {
+		 listChars.push_back(nChar);
+	 }
+	 
+	 cout << "Displaying the vector of integers: " << endl;
+	 
+	 /* Display the array of integers */
+	 for_each(vecIntegers.begin(),		/* Start of range */
+			vecIntegers.end(),			/* End of range */
+			DisplayElement<int>::myPrint);		/* Unary function object */
+			
+	cout << endl << endl;
+	
+	cout << "Displaying the vector of integers: " << endl;
+	
+	DisplayElement<int> myTest;
+	 /* Display the array of integers */
+	 for_each(vecIntegers.begin(),		/* Start of range */
+			vecIntegers.end(),			/* End of range */
+			myTest.myPrint);		/* Unary function object */
+			
+	cout << endl << endl;
+	
+	
+	cout << "Displaying the list of characters: " << endl;
+	
+	/* Display the list of characters */
+	for_each(listChars.begin(),			/* Start of range */
+			listChars.end(),			/* End of range */
+			DisplayElement<char>());	/* Unary function object */
+			
+	cout << endl;
+	
+	return 0;
+ }
+/*************************************************/
+
+3.一元谓词例子
+/*************************************************/
+//structure as a unary predicate
+template <typename numberType>
+struct IsMultiple
+{
+   numberType Divisor;
+
+   IsMultiple (const numberType& divisor)
+   {
+      Divisor = divisor;
+   }
+
+   bool operator () (const numberType& element) const
+   {
+      // Check if the dividend is a multiple of the divisor
+      return ((element % Divisor) == 0);
+   }
+};
+
+#include <algorithm>
+#include <vector>
+#include <iostream>
+using namespace std; 
+
+int main ()
+{
+   vector <int> vecIntegers;
+   cout << "The vector contains the following sample values: ";
+
+   // Insert sample values: 25 - 31
+   for (int nCount = 25; nCount < 32; ++ nCount)
+   {
+      vecIntegers.push_back (nCount);
+      cout << nCount << ' ';
+   }
+   cout << endl << "Enter divisor (> 0): ";
+   int Divisor = 2;
+   cin >> Divisor;
+
+   // Find the first element that is a multiple of 4 in the collection
+   auto iElement = find_if ( vecIntegers.begin ()
+                      , vecIntegers.end ()
+                      , IsMultiple<int>(Divisor) );  
+
+   if (iElement != vecIntegers.end ())
+   {
+      cout << "First element in vector divisible by " << Divisor;
+      cout << ": " << *iElement << endl;
+    }
+
+   return 0;
+}
+/*************************************************/	
