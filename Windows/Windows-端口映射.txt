@@ -1,0 +1,43 @@
+1.概念
+{
+	1.所谓的映射、转发是针对接受数据的端口而言的，一般用作服务端，要侦听的。
+	2.应用场景：原本有个服务程序在PC2上运行，侦听这PC2上的B端口，现在希望在不动PC2及服务程序的前提下，外界能够通过PC1的A端口与PC2上服务程序通信，这时就需要用端口映射（端口转发）来解决。
+	
+	3.将PC1的A端口映射到PC2的B端口，是指将PC1的A端口收到的数据转发到PC2的B端口。外界都来连PC1的A端口，PC1的A端口只做受理窗口，具体业务处理放在PC2的B端口。其实，PC2的B端口仍然能用，就是多了一个受理窗口（PC1的A端口）。
+	
+	4.所以端口映射体现的是横向扩展，不是移花接木。
+}
+
+2.实现
+{
+	1.用windows的netsh实现
+	{
+		1.优点
+		{
+			1.部署简单。Windows自带，支持IPv4和IPv6。
+			2.不用重启机器，还长记性。命令即使生效，重启系统后配置仍在。
+		}
+		2.缺点
+		{
+			1.不支持UDP。
+			2.XP/2003需要先安装IPv6,Win7以上系统自带。
+		}
+		3.用法
+		{
+			命令提示符下：
+			1.查看已配置的“端口映射”清单。
+				netsh interface portproxy show v4tov4
+				
+			2.添加“端口映射”。
+				netsh interface portproxy add v4tov4 listenaddress=PC1IP listenport=A connectaddress=PC2IP connectport=B
+				将PC1的A端口映射到PC2的B端口。
+				
+			3.删除“端口映射”。
+				netsh interface portproxy delete v4tov4 listenaddress=PC1IP listenport=A
+		}
+	}
+	
+	2.用SSH端口转发实现。
+		好贴：https://www.ibm.com/developerworks/cn/linux/l-cn-sshforward/
+		好例：http://koumm.blog.51cto.com/703525/1318975
+}
