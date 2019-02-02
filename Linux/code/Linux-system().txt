@@ -1,0 +1,19 @@
+1.system()理解
+{
+	1.功能：system()调用"/bin/sh -c command"执行特定的命令，阻塞当前进程直到command命令执行完毕。
+	2.原型：
+		int system(const char* command);
+	
+	3.返回值：如果无法启动shell运行命令，system将返回127;出现不能执行system调用的其他错误时返回-1。如果system能够顺利执行，返回哪个命令的退出码。
+}
+
+2.原理
+{
+	1.system()会调用fork()产生子进程，由子进程来调用"/bin/sh -c string"来执行string所代表的的命令，此命令执行完后随即返回原调用的进程。
+	2.返回值：
+		-1：出现错误。
+		0：调用成功但创建子进程失败。
+		>0：成功退出的子进程id。
+	3.如果system()在调用/bin/sh时失败则返回127，其他失败原因返回-1。若参数string为NULL，则返回非零值。如果system()调用成功则最后会返回执行shell命令后的返回值，但是此返回值也有可能为system()调用/bin/sh失败所返回的127，因此最好能再检查errno 来确认执行成功。
+	4.在编写具有SUID/SGID权限的程序时请勿使用system()，system()会继承环境变量，通过环境变量可能会造成系统安全的问题。
+}

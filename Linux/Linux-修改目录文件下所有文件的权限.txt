@@ -1,0 +1,2 @@
+chmod -R xxx diretory_name
+xxx : 权限值

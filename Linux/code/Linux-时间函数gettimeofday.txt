@@ -1,0 +1,66 @@
+简介：在C语言中可以使用函数gettimeofday()来得到时间，它精确到微秒。
+
+头文件：#include <sys/time.h>
+
+函数原型：int gettimeofday(struct timeval *tv,struct timezone *tz)
+
+说明：gettimeofday()会将当前时间信息以 tv 结构体返回，当地时区信息以 tz 结构体返回。
+
+struct timeval
+{
+	long tv_sec;	/* 秒 */
+	long tv_usec;	/* 微秒 */
+};
+
+struct timezone
+{
+	int tz_minuteswest;	/* 和格林尼治时间相差值 */
+	int tz_dsttime;		/* 夏令时 */
+}
+
+使用：
+	1.参数 tv , tz 都可以为空，如果为空则不返回其对应的结构体。
+	2.函数执行成功后返回0，失败返回-1，错误代码存储于errno中。
+	3.在使用该函数时，第二个参数一般都为空，因为我们一般都只是为了获得当前时间。
+
+例：
+/*
+	Author wxh
+	Date 20190124
+	Description 使用 gettimeofday 函数来计算程序运行的时间
+*/
+
+#include <sys/time.h>
+#include <iostream>
+
+/* 测试函数 */
+void runDelay(int time)
+{
+	int i,j;
+
+	for(i=0;i<time;i++)
+	{
+		for(j=0;j<5000;j++);
+	}
+
+	return;
+}
+
+int main()
+{
+	struct timeval start;
+	struct timeval end;
+	unsigned long sum;
+
+	gettimeofday(&start,nullptr);
+
+	runDelay(10);
+
+	gettimeofday(&end,nullptr);
+
+	sum = 1000000 * (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec);
+
+	std::cout << "Running time = " << sum << " usec" << std::endl;
+
+	return 0;
+}

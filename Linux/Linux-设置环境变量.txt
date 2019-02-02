@@ -1,0 +1,8 @@
+1.打开 /etc/profile
+	# vim /etc/profile
+
+2.添加程序路径 /usr/local/mysql/bin
+	export PATH=$PATH:/usr/local/mysql/bin
+
+3.使配置生效
+	# source /etc/profile
