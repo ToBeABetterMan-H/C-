@@ -1,0 +1,192 @@
+1.什么是Thrift?
+{
+	1.Thrift是一个软件框架。
+	2.用来进行可扩展且跨语言的服务的开发。
+	3.结合功能强大的软件 堆栈 和 代码生成引擎，以构建在各种编程语言间无缝结合的、高效的服务。
+	4.最初由facebook开发用做系统内个语言之间的RPC通信。
+	5.简单来说就是RFC远程调用，它是一个完整的RFC框架体系。
+}
+
+2.在centos7 下安装Thrift
+{
+	1.安装centos需要的扩展。
+		yum install -y automake libtool flex bison pkgconfig gcc-c++ libevent-devel zlib-devel python-devel ruby-devel openssl-devel
+	2.安装boost。
+	{
+		1.boost安装包下载。
+			https://dl.bintray.com/boostorg/release/1.67.0/source/
+		2.安装boost。
+			tar -xvf boost_1_67_0.tar.gz
+			cd boost_1_67_0
+			./bootstrap.sh
+			./b2 install		
+	}
+	3.安装thrift。
+	{
+		1.thrift安装包下载。
+		
+		2.安装thrift。
+			1.	tar -xvf thrift-0.11.0.tar.gz
+			2.	cd thrift-0.11.0
+			3.	./configure --with-lua=no --with-boost --prefix=/usr/local/thrift
+			4.	make
+			{
+				1.在 make 这一步会发生一个错误 g++: error: /usr/lib64/libboost_unit_test_framework.a: No such file or directory。
+				2.错误原因是：./configure 的时候是默认编译32位的，不会在 /usr/lib64/ 下产生文件。
+				3.修改方法：先查找文件 find / -name libboost_unit_test_framework.a，比如在 /usr/local/lib/libboost_unit_test_framework.a，就可以做如下操作，sudo ln -s /usr/local/lib/libboost_unit_test_framework.a /usr/lib64/libboost_unit_test_framework.a，然后重新执行 make。
+			}
+			5.	make install
+	}
+}
+	
+3.Thrift实际上是实现了C/S模式，通过代码生成工具将.thrift生成服务器端和客户端代码(可以生成不同的语言)，从而实现服务端和客户端跨语言的支持。
+
+4.用户在.thrift中声明自己的服务，这些经过编译后会生成相应的代码文件，然后客户端调用服务，服务器端提供服务v便可以了。
+
+5.一般将服务放到一个.thrift文件中
+{
+	1.变量声明(variable)
+	2.数据声明(struct)
+	3.服务接口声明(service)	/* 可以继承其他接口 */
+}
+
+6.Thrift语法
+{
+	1.数据类型
+	{
+		1.基本类型：不支持无符号整型
+		{
+			bool: 1个字节
+			byte: 有符号单字节
+			i16: 有符号16位整型
+			i32：有符号32位整型
+			i64: 有符号64位整型
+			double: 64位浮点数
+			string：字符串
+			binary: 字节数组
+		}
+		2.容器：容器中的元素类型可以是除service以外的任何合法的thrift类型
+		{
+			map<t1.t2>：字典。
+			list<t1>: 列表，元素类型为t1的有序表，容许元素重复。
+			set<t1>: 集合，元类型为t1的无序表，不容许元素重复。
+		}
+		3.结构体 struct ：在面向对象语言中，thrift结构体被转换成类
+		{
+			1.结构体中，每个字段包含一个整数ID、数据类型、字段名、可选默认值。
+			2.规范的struct定义中的每个域均会使用required或者optional
+			{
+				1.required: 必须赋值。
+				2.optional: 若不赋值，则该域将不会被序列化传输。
+			}
+			3.struct Work{
+				1: i32 num1 = 0,
+				2: i32 num2,
+				3: Operation ip,
+				4: optional string comment,		/* 末尾跟着',' */
+			}
+		}
+		4.异常 exception
+		{
+			1.语法和功能上类似于结构体。
+			2.语义：当定义一个RPC服务时，开发者可能需要声明一个远程方法抛出一个异常。
+			3.exception InvalidOperation{
+				1: i32 what,
+				2: string why		/* 末尾没跟',' */
+			}
+		}
+		5.服务 service
+		{
+			1.Thrift编译器会根据选择的目标语言为server产生服务接口代码，为client产生桩代码。
+			2.支持继承，使用关键字 extends
+			service Twitter {		/* 注意 '{' 前要有空格 */
+				void ping(),		/* 函数定义可以使用','或';'标识结束 */
+				bool postTweet(1: Tweet tweet);		/* 参数只读，不可作为返回值 */
+				TweetSearchResult searchTweets(1: string query);
+				
+				oneway void zip()	/* 1."oneway"标识符表示client发出请求后不必等待回复
+									 * 2."oneway"返回值必须是void*/
+			}
+		}
+		6.枚举类型 enum：枚举常量必须是32位的正整数
+		{
+			enum TweetType {
+				TWEET,			/* 编译器默认从1开始赋值 */
+				RETWEET = 2,	/* 可以赋予某个常量某个整数 */
+				DM = oxa,		/* 允许常量是十六进制数 */
+				REPLY			/* 末尾没有逗号 */
+			}
+		}
+		7.常量 const
+		{
+			1.Thrift允许用户定义常量。
+				const i32 INT_CONST = 1234;		/* 分号可选 */
+				const map<string,string> MAP_CONST = {"hello": "world","good": "bye"}
+			2.Thrift支持typedef语句。
+				typedef i32 MyInteger
+		}
+	}
+	2.命名空间
+	{
+		namespace cpp com.example.project
+	}
+}
+
+7.产生代码
+{
+	1.Server (single threaded, event driven etc)
+	{
+		1.创建一个transport对象。
+		2.为transport对象创建输入输出protocol。
+		3.基于输入输出protocol创建processor。
+		4.等待连接请求并将之交给processor处理。
+	}
+	2.Processor (complier generated)
+	{
+		1.Processor封装了输入数据流的读写操作，读写数据流用Protocol对象表示。
+		2.Processor主要工作流程
+		{
+			1.从连接中读取数据(使用输入protocol)。
+			2.将处理授权给handler(由用户实现)。
+			3.将最后结果写到连接上(使用输出protocol)。
+		}
+		3. interface TProcessor {
+			bool process(TProtocol in,TProtocol out) throws TException
+		}
+	}
+	3.Protocol (JSON, compact etc)
+	{
+		1.定义了datatype怎样使用底层的Transport对自己进行编解码。
+		2.Protocol的实现要给出编码机制并负责对数据进行序列化。
+		
+	}
+	4.Transport (raw TCP, HTTP etc)
+	{
+		1.提供一个简单的网络读写抽象层。使得thrift底层的transport从系统其它部分解耦。
+		2.Transport接口提供方法
+		{
+			open
+			close
+			read
+			write
+			listen
+			accept
+			flush
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

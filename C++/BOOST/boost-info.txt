@@ -1,0 +1,77 @@
+0.报错情况
+{
+	1.-lboost_system
+	{
+		报错：/usr/bin/ld: /tmp/ccTohSPB.o: undefined reference to symbol '_ZN5boost6system16generic_categoryEv'
+		//usr/local/lib/libboost_system.so.1.67.0: error adding symbols: DSO missing from command line
+		collect2: error: ld returned 1 exit status
+	}
+
+	2.-lpthread
+	{
+		报错：/usr/bin/ld: /tmp/ccqr2rrQ.o: undefined reference to symbol 'pthread_condattr_setclock@@GLIBC_2.3.3'
+		//usr/lib64/libpthread.so.0: error adding symbols: DSO missing from command line
+		collect2: error: ld returned 1 exit status
+	}
+	
+	3.-lboost_thread
+	{
+		报错：undefined reference to `vtable for boost::detail::thread_data_base'
+	}
+}
+
+http://zh.highscore.de/cpp/boost/
+
+1.安装
+{
+	1.boost安装包下载。
+		https://dl.bintray.com/boostorg/release/1.67.0/source/
+	2.安装boost。
+		tar -zxvf boost_1_67_0.tar.gz
+		cd boost_1_67_0
+		./bootstrap.sh	--with-libraries=all 
+		./b2 install --prefix=/usr/local/boost
+		ldconfig
+}
+
+2.智能指针
+{
+	1.概述
+	{
+		1998年修订的第一版C++标准只提供了一种智能指针：std::auto_ptr。它基本上就像是个普通的指针：通过地址来访问一个动态分配的对象。std::auto_ptr之所以被看做是智能指针，是因为它会在析构的时候调用delete操作符来自动释放所包含的对象。当然这要求在初始化的时候，传给它一个由new操作符返回的对象的地址。既然std::auto_ptr的析构函数会调用delete操作符，它所包含的对象的内存会确保释放掉。
+		当和异常联系起来时：没有std::auto_ptr这样的智能指针，每一个动态分配内存的函数都需要捕捉所有可能的异常，以确保在异常传递给函数的调用者之前将内存释放掉。
+	}
+	2.RAII
+	{
+		智能指针的原理基于一个常见的习语叫做RAII：资源申请即初始化。智能指针只是这个习语的其中一例。智能指针确保在任何情况下，动态分配的内存都能得到正确释放，从而将开发人员从这项任务中解放了出来。这包括程序因为异常而中断，原本用于释放内存的代码被跳过的场景。用一个动态分配的对象的地址来初始化智能指针，在析构的时候释放内存，就确保了这一点。因为析构函数总是会被执行的，这样所包含的内存也将总是会被释放。
+		无论何时，一定得有第二条指令来释放之前另一条指令所分配的资源时，RAII都是适用的。许多的C++应用程序都需要动态管理内存，因而智能指针是一种很重要的RAII类型。
+	}
+	3.作用域指针
+	{
+		一个作用域指针独占一个动态分配的对象。对应的类名为boost::scoped_ptr，它的定义在boost/scoped_ptr.hpp中。不像std::auto_ptr，一个作用域指针不能传递它所包含的对象的所有权到另一个作用域指针。一旦用一个地址来初始化，这个动态分配的对象将在析构阶段释放。
+		因为一个作用域指针只是简单保存和独占一个内存地址，所以boost::scoped_ptr的实现就要比std::auto_ptr简单。在不需要所有权传递的时候应该优先使用boost::scoped_ptr。在这些情况下，比起std::auto_ptr它是一个更好的选择，因为可以避免不经意的所有权传递。
+		一经初始化，智能指针boost::scoped_ptr所包含的对象，可以通过类似于普通指针的接口来访问。这是因为重载了相关的操作符operator*(),operator->()和operator bool()。此外，还有get()和reset()方法。前者返回所含对象的地址，后者用一个新的对象来重新初始化智能指针。在这种情况下，新创建的对象赋值之前会先自动释放所包含的对象。
+	}
+	4.共享指针
+	{
+		在Boost C++库里，这个智能指针命名为boost::shared_ptr，定义在boost/shared_ptr.hpp里。
+		智能指针boost::shared_ptr基本类似于boost::scoped_ptr。关键不同之处在于boost::shared_ptr不一定要独占一个对象。它可以和其他boost::shared_ptr类型的智能指针共享所有权。在这种情况下，当引用对象的最后一个智能指针销毁后，对象才会被释放。
+		因为所有权可以在boost::shared_ptr之间共享，任何一个共享指针都可以被复制，这跟boost::scoped_ptr是不同的。这样就可以在标准容器里存储智能指针了。
+		{
+			#include <boost/shared_ptr.hpp>
+			#include <vector>
+			
+			int main()
+			{
+				std::vector<boost::shared_ptr<int>> v;
+				v.push_back(boost::shared_ptr<int>(new int(1)));
+				v.push_back(boost::shared_ptr<int>(new int(2)));
+			}
+		}
+	}
+}
+
+3.函数对象(高阶函数)
+{
+	1.它实际上是指那些可以被传入到其他函数或是从其他函数返回的一类函数。
+}

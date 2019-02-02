@@ -1,0 +1,23 @@
+do
+{
+	if(expr)
+	{
+		break;
+	}
+	if(expr)
+	{
+		break;
+	}
+	if(expr)
+	{
+		break;
+	}
+	if(expr)
+	{
+		break;
+	}
+	if(expr)
+	{
+		break;
+	}
+}while(false);
