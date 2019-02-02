@@ -1,0 +1,18 @@
+MySQL忽略主键冲突，避免重复插入数据的三种方式
+
+方法一：ignore
+	INSERT IGNORE INTO
+插入时检索主键列表，如存在相同主键记录，不更改原记录，只插入新记录
+ignore 关键字所修饰的SQL语句执行后，在遇到主键冲突时会返回一个0，代表并没有插入此条数据。
+如果主键是由后台生成的，我们可以通过判断这个返回值是否为0来判断主键是否有冲突，从而重新生成新的主键 key
+
+方法二：replace
+	REPLACE INTO
+插入时如发现主键已存在，则替换原记录，即先删除原记录，后 insert 新记录。
+
+方法三：on duplicate key update
+	INSERT INTO ... ON DUPLICATE KEY UPDATE
+例：
+	MariaDB [wxh]> INSERT INTO A VALUES(1,'2019',99) ON DUPLICATE KEY UPDATE `name` = 'wxh';
+	Query OK, 2 rows affected (0.13 sec)
+	往表 A 插入数据 (1,'2019',99) ,如果发生主键冲突，则将 `name` 列值改为 'wxh'

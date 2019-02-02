@@ -1,0 +1,42 @@
+1.解压缩移动mariadb
+	解压到/usr/local/mysql
+
+2.添加mysql用户，并拒绝telent
+	useradd -s /sbin/nologin mysql
+	
+3.创建data目录
+	mkdir -p /datal/database/running
+	chown -R mysql:mysql /datal/database/running
+	
+4.创建数据库
+	cd /usr/local/mysql
+	./scripts/mysql_install_db --user=mysql --datadir=/datal/database/running
+	
+5.设置为服务
+	cp support-files/my-large.cnf /etc/my.cnf
+	cp support-files/mysql.server /etc/init.d/mysqld
+	chmod 755 /etc/init.d/mysqld
+	
+	vi /etc/init.d/mysqld
+		basedir=/usr/local/mysql
+		datadir=/datal/database/running
+	vi /etc/my.cnf
+		[mysqld]中添加：
+			basedir=/usr/local/mysql
+			datadir=/datal/database/running
+	
+	chkconfig --add mysqld
+	chkconfig mysqld on
+	
+6.启动数据库
+	service mysqld start
+	
+7.创建数据库root用户
+	./bin/mysqladmin -u root password smarthome
+	
+8.允许数据库远程连接
+	mysql -u root -p
+		use mysql
+		grant all privileges on *.* to 'root'@'%' identified by 'smarthome' with grant option;
+		FLUSH PRIVILEGES;
+		QUIT;
