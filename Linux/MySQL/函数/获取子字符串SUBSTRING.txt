@@ -1,0 +1,29 @@
+函数：SUBSTRING(string,position,length) / SUBSTRING(string FROM position FOR length)
+	相等函数：SUBSTR
+
+作用：从指定位置开始截取子字符串。
+	1.参数 string 为源字符串；
+	2.参数 position 是一个整数，用于指定子串的起始字符位置，正数代表从左计算位置，负数代表从右计算位置，为0返回空字符串;
+	3.参数 length 代表子串的长度，[可选]。
+
+例：
+	mysql> select SUBSTRING('HELLO WORD',7,10);
+	+------------------------------+
+	| SUBSTRING('HELLO WORD',7,10) |
+	+------------------------------+
+	| WORD                         |
+	+------------------------------+
+
+	mysql> select SUBSTRING('HELLO WORD',-3);
+	+----------------------------+
+	| SUBSTRING('HELLO WORD',-3) |
+	+----------------------------+
+	| ORD                        |
+	+----------------------------+
+
+	mysql> select SUBSTRING('HELLO WORD',0);
+	+---------------------------+
+	| SUBSTRING('HELLO WORD',0) |
+	+---------------------------+
+	|                           |
+	+---------------------------+
